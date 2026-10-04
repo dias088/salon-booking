@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "salon-booking-backend"
+version = "0.1.0"
+description = "Онлайн-запись в салон красоты — FastAPI + SQLAlchemy 2.0 + PostgreSQL 16"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "uvicorn[standard]>=0.30",
+    "sqlalchemy[asyncio]>=2.0.30,<2.1",
+    "asyncpg>=0.29",
+    "alembic>=1.13",
+    "pydantic[email]>=2.7,<3.0",
+    "pydantic-settings>=2.3",
+    "passlib[bcrypt]>=1.7.4",
+    # passlib 1.7.4 читает bcrypt.__about__, которого нет в bcrypt 5.x —
+    # получается шумный (безвредный) warning. Держим 4.x.
+    "bcrypt>=4.0.1,<5.0",
+    "python-jose[cryptography]>=3.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+# ---------------------------------------------------------------------------
+# ruff
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "UP",       # pyupgrade
+    "B",        # bugbear
+    "C4",       # comprehensions
+    "SIM",      # simplify
+    "ASYNC",    # async-specific traps
+    "RUF",
+]
+ignore = [
+    "B008",     # FastAPI-зависимости в дефолтах аргументов — это идиома фреймворка
+    "RUF001",   # кириллица в строках и комментариях — намеренно
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["E501"]
+
+# ---------------------------------------------------------------------------
+# mypy
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+files = ["app", "tests"]
+exclude = "alembic/"
+strict = true
+warn_unreachable = true
+# Декораторы FastAPI/pytest возвращают нетипизированные обёртки
+disallow_untyped_decorators = false
+
+[[tool.mypy.overrides]]
+module = ["jose.*", "passlib.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = true
+warn_return_any = false
+
+# ---------------------------------------------------------------------------
+# pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+addopts = "-q --strict-markers"
+markers = [
+    "integration: тесты, которым нужна настоящая PostgreSQL (TEST_DATABASE_URL)",
+]
