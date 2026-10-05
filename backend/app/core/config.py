@@ -76,8 +76,12 @@ class Settings(BaseSettings):
 
 @functools.lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    """Кэшируется, чтобы .env читался один раз за процесс."""
-    return Settings()  # type: ignore[call-arg]  # остальные поля приходят из окружения
+    """Кэшируется, чтобы .env читался один раз за процесс.
+
+    database_url и jwt_secret без значений по умолчанию — их обязательно
+    задаёт окружение, иначе приложение честно падает на старте.
+    """
+    return Settings()
 
 
 settings = get_settings()

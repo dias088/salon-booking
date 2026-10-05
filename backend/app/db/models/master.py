@@ -17,14 +17,13 @@ from sqlalchemy import (
     CheckConstraint,
     ForeignKey,
     Index,
-    Range,
     SmallInteger,
     String,
     Text,
     Time,
     text,
 )
-from sqlalchemy.dialects.postgresql import TSTZRANGE, ExcludeConstraint
+from sqlalchemy.dialects.postgresql import TSTZRANGE, ExcludeConstraint, Range
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base

@@ -13,6 +13,12 @@
 --  В psql подставь значения вручную, например:
 --    \set date_from '2026-09-01'
 --  либо замени :date_from на литерал.
+--
+--  ВАЖНО про касты: параметры приводятся через CAST(:x AS type), а не
+--  через :x::type. SQLAlchemy ищет параметры регуляркой, которая не
+--  распознаёт имя, если сразу за ним идёт двоеточие: запись вида :tz плюс
+--  ::text параметром не считается, и запрос падает с syntax error near ":".
+--  Касты самих колонок (period::text и подобные) писать можно как обычно.
 -- ===========================================================================
 
 
@@ -29,8 +35,8 @@ WITH monthly AS (
         sum(a.price_at_booking)                                     AS revenue
     FROM appointments a
     WHERE a.status = 'completed'
-      AND lower(a.period) >= (:date_from::timestamp AT TIME ZONE :tz)
-      AND lower(a.period) <  (:date_to::timestamp   AT TIME ZONE :tz)
+      AND lower(a.period) >= (CAST(:date_from AS timestamp) AT TIME ZONE :tz)
+      AND lower(a.period) <  (CAST(:date_to AS timestamp)   AT TIME ZONE :tz)
     GROUP BY 1
 )
 SELECT
@@ -68,8 +74,8 @@ FROM appointments a
 JOIN services           s  ON s.id  = a.service_id
 JOIN service_categories sc ON sc.id = s.category_id
 WHERE a.status = 'completed'
-  AND lower(a.period) >= (:date_from::timestamp AT TIME ZONE :tz)
-  AND lower(a.period) <  (:date_to::timestamp   AT TIME ZONE :tz)
+  AND lower(a.period) >= (CAST(:date_from AS timestamp) AT TIME ZONE :tz)
+  AND lower(a.period) <  (CAST(:date_to AS timestamp)   AT TIME ZONE :tz)
 GROUP BY s.id, s.name, sc.id, sc.name
 ORDER BY revenue DESC;
 
@@ -81,9 +87,9 @@ ORDER BY revenue DESC;
 --   booked_min   — минуты всех неотменённых визитов
 -- weekday в working_hours: 0 = понедельник, поэтому ISODOW - 1.
 WITH bounds AS (
-    SELECT :date_from::date AS day_from,
-           :date_to::date   AS day_to,
-           :tz::text        AS tz
+    SELECT CAST(:date_from AS date) AS day_from,
+           CAST(:date_to AS date)   AS day_to,
+           CAST(:tz AS text)        AS tz
 ),
 calendar AS (
     SELECT g::date AS day, b.tz
@@ -150,8 +156,8 @@ SELECT
     round(100 * count(*)::numeric / NULLIF(sum(count(*)) OVER (), 0), 1) AS share_pct
 FROM appointments a
 WHERE a.status <> 'cancelled'
-  AND lower(a.period) >= (:date_from::timestamp AT TIME ZONE :tz)
-  AND lower(a.period) <  (:date_to::timestamp   AT TIME ZONE :tz)
+  AND lower(a.period) >= (CAST(:date_from AS timestamp) AT TIME ZONE :tz)
+  AND lower(a.period) <  (CAST(:date_to AS timestamp)   AT TIME ZONE :tz)
 GROUP BY 1, 2
 ORDER BY appointments DESC, weekday;
 
@@ -164,7 +170,7 @@ SELECT
     COALESCE(sum(a.price_at_booking), 0)                                AS amount,
     round(100 * count(*)::numeric / NULLIF(sum(count(*)) OVER (), 0), 1) AS share_pct
 FROM appointments a
-WHERE lower(a.period) >= (:date_from::timestamp AT TIME ZONE :tz)
-  AND lower(a.period) <  (:date_to::timestamp   AT TIME ZONE :tz)
+WHERE lower(a.period) >= (CAST(:date_from AS timestamp) AT TIME ZONE :tz)
+  AND lower(a.period) <  (CAST(:date_to AS timestamp)   AT TIME ZONE :tz)
 GROUP BY a.status
 ORDER BY appointments DESC;

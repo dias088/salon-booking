@@ -23,7 +23,8 @@ from dataclasses import dataclass, field
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
-from sqlalchemy import Range, select, text
+from sqlalchemy import select, text
+from sqlalchemy.dialects.postgresql import Range
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -95,7 +96,9 @@ CATEGORIES: list[CategorySeed] = [
             ServiceSeed("Женская стрижка", 60, 9000, "Мытьё, стрижка, укладка феном."),
             ServiceSeed("Мужская стрижка", 45, 6000, "Классическая или машинкой, с окантовкой."),
             ServiceSeed("Детская стрижка", 30, 4500, "Для детей до 12 лет, спокойно и быстро."),
-            ServiceSeed("Укладка и локоны", 60, 8000, "Укладка на выход: плойка, брашинг, фиксация."),
+            ServiceSeed(
+                "Укладка и локоны", 60, 8000, "Укладка на выход: плойка, брашинг, фиксация."
+            ),
         ],
     ),
     CategorySeed(
@@ -129,7 +132,9 @@ MASTERS: list[MasterSeed] = [
         phone="+7 701 100 10 01",
         bio="Парикмахер-стилист, 8 лет в профессии. Женские и детские стрижки, укладки.",
         # Пн-Пт с обедом 14:00-15:00 — два интервала в один день недели.
-        schedule={d: [(time(10, 0), time(14, 0)), (time(15, 0), time(19, 0))] for d in WEEKDAYS_MON_FRI},
+        schedule={
+            d: [(time(10, 0), time(14, 0)), (time(15, 0), time(19, 0))] for d in WEEKDAYS_MON_FRI
+        },
         service_names=[
             "Женская стрижка",
             "Мужская стрижка",
@@ -144,7 +149,10 @@ MASTERS: list[MasterSeed] = [
         phone="+7 701 100 10 02",
         bio="Колорист. Airtouch, сложные растяжки, работа с блондом.",
         # Вт-Сб без обеда, длинная смена под долгие окрашивания.
-        schedule={d: [(time(11, 0), time(20, 0))] for d in (TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY)},
+        schedule={
+            d: [(time(11, 0), time(20, 0))]
+            for d in (TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY)
+        },
         service_names=[
             "Окрашивание в один тон",
             "Airtouch",
@@ -178,7 +186,9 @@ MASTERS: list[MasterSeed] = [
         phone="+7 701 100 10 04",
         bio="Барбер. Мужские стрижки, бороды, работа с машинкой.",
         # Со среды по воскресенье — закрывает выходные, когда остальные отдыхают.
-        schedule={d: [(time(12, 0), time(21, 0))] for d in (WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)},
+        schedule={
+            d: [(time(12, 0), time(21, 0))] for d in (WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)
+        },
         service_names=["Мужская стрижка", "Детская стрижка"],
         # Работает быстрее: 30 минут вместо 45.
         overrides={"Мужская стрижка": (7000, 30)},
@@ -227,9 +237,7 @@ def vacation_window(today: date) -> tuple[datetime, datetime]:
 
 
 async def wipe(session: AsyncSession) -> None:
-    await session.execute(
-        text(f"TRUNCATE {', '.join(TABLES_TO_WIPE)} RESTART IDENTITY CASCADE")
-    )
+    await session.execute(text(f"TRUNCATE {', '.join(TABLES_TO_WIPE)} RESTART IDENTITY CASCADE"))
 
 
 async def create_catalog(session: AsyncSession) -> dict[str, Service]:
@@ -405,7 +413,9 @@ def pick_status(candidate: Candidate, now: datetime) -> tuple[AppointmentStatus,
             return AppointmentStatus.completed, None
         if roll < 0.91:
             return AppointmentStatus.no_show, None
-        return AppointmentStatus.cancelled, candidate.starts_at - timedelta(hours=RNG.randint(3, 48))
+        return AppointmentStatus.cancelled, candidate.starts_at - timedelta(
+            hours=RNG.randint(3, 48)
+        )
     if RNG.random() < 0.88:
         return AppointmentStatus.booked, None
     return AppointmentStatus.cancelled, now - timedelta(hours=RNG.randint(1, 72))

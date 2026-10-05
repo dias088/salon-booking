@@ -115,8 +115,10 @@ def upgrade() -> None:
         sa.Column("weekday", sa.SmallInteger(), nullable=False),
         sa.Column("start_time", sa.Time(), nullable=False),
         sa.Column("end_time", sa.Time(), nullable=False),
-        sa.CheckConstraint("weekday BETWEEN 0 AND 6", name="working_hours_weekday_range"),
-        sa.CheckConstraint("end_time > start_time", name="working_hours_time_order"),
+        # Имена CHECK короткие: Alembic берёт naming_convention из
+        # target_metadata и сам добавит префикс таблицы (см. app/db/base.py).
+        sa.CheckConstraint("weekday BETWEEN 0 AND 6", name="weekday_range"),
+        sa.CheckConstraint("end_time > start_time", name="time_order"),
         sa.ForeignKeyConstraint(
             ["master_id"], ["masters.id"], name="working_hours_master_id_fkey", ondelete="CASCADE"
         ),
@@ -144,7 +146,7 @@ def upgrade() -> None:
         sa.Column("reason", sa.String(length=200), nullable=True),
         sa.CheckConstraint(
             "lower(period) IS NOT NULL AND upper(period) IS NOT NULL AND NOT isempty(period)",
-            name="time_off_period_bounded",
+            name="period_bounded",
         ),
         sa.ForeignKeyConstraint(
             ["master_id"], ["masters.id"], name="time_off_master_id_fkey", ondelete="CASCADE"
@@ -181,9 +183,9 @@ def upgrade() -> None:
         sa.Column("duration_min", sa.Integer(), nullable=False),
         sa.Column("price", sa.Numeric(precision=10, scale=2), nullable=False),
         sa.Column("is_active", sa.Boolean(), server_default=sa.text("true"), nullable=False),
-        sa.CheckConstraint("duration_min > 0", name="services_duration_positive"),
-        sa.CheckConstraint("price >= 0", name="services_price_non_negative"),
-        sa.CheckConstraint("mod(duration_min, 5) = 0", name="services_duration_step"),
+        sa.CheckConstraint("duration_min > 0", name="duration_positive"),
+        sa.CheckConstraint("price >= 0", name="price_non_negative"),
+        sa.CheckConstraint("mod(duration_min, 5) = 0", name="duration_step"),
         sa.ForeignKeyConstraint(
             ["category_id"],
             ["service_categories.id"],
@@ -203,12 +205,12 @@ def upgrade() -> None:
         sa.Column("duration_min_override", sa.Integer(), nullable=True),
         sa.CheckConstraint(
             "price_override IS NULL OR price_override >= 0",
-            name="master_services_price_non_negative",
+            name="price_non_negative",
         ),
         sa.CheckConstraint(
             "duration_min_override IS NULL OR "
             "(duration_min_override > 0 AND mod(duration_min_override, 5) = 0)",
-            name="master_services_duration_valid",
+            name="duration_valid",
         ),
         sa.ForeignKeyConstraint(
             ["master_id"], ["masters.id"], name="master_services_master_id_fkey", ondelete="CASCADE"
@@ -240,12 +242,12 @@ def upgrade() -> None:
         sa.Column("cancelled_at", sa.DateTime(timezone=True), nullable=True),
         sa.CheckConstraint(
             "lower(period) IS NOT NULL AND upper(period) IS NOT NULL AND NOT isempty(period)",
-            name="appointments_period_bounded",
+            name="period_bounded",
         ),
-        sa.CheckConstraint("price_at_booking >= 0", name="appointments_price_non_negative"),
+        sa.CheckConstraint("price_at_booking >= 0", name="price_non_negative"),
         sa.CheckConstraint(
             "(status = 'cancelled') = (cancelled_at IS NOT NULL)",
-            name="appointments_cancelled_at_consistent",
+            name="cancelled_at_consistent",
         ),
         sa.ForeignKeyConstraint(
             ["client_id"], ["users.id"], name="appointments_client_id_fkey", ondelete="RESTRICT"

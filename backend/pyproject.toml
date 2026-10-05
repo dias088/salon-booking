@@ -16,10 +16,17 @@ dependencies = [
     "pydantic[email]>=2.7,<3.0",
     "pydantic-settings>=2.3",
     "passlib[bcrypt]>=1.7.4",
-    # passlib 1.7.4 читает bcrypt.__about__, которого нет в bcrypt 5.x —
-    # получается шумный (безвредный) warning. Держим 4.x.
-    "bcrypt>=4.0.1,<5.0",
+    # passlib 1.7.4 (последний релиз — 2020) определяет версию бэкенда через
+    # bcrypt.__about__, который убрали в bcrypt 4.1. Без пина это даёт
+    # "(trapped) error reading bcrypt version" при каждом запуске: хэширование
+    # работает, но лог засоряется. 4.0.1 — последняя версия с __about__.
+    # Правильное решение — отказаться от passlib в пользу bcrypt напрямую,
+    # но стек согласован, поэтому пин.
+    "bcrypt>=4.0.1,<4.1",
     "python-jose[cryptography]>=3.3",
+    # Без неё zoneinfo не находит Asia/Almaty: в Windows нет системной базы
+    # часовых поясов, а в slim-образах Linux её тоже часто вырезают.
+    "tzdata>=2024.1",
 ]
 
 [project.optional-dependencies]

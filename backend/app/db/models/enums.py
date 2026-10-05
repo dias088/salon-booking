@@ -10,14 +10,18 @@ from __future__ import annotations
 
 import enum
 
+# StrEnum, а не (str, Enum): у StrEnum str() и f-строки дают само значение
+# ("booked"), а не "AppointmentStatus.booked", что заметно упрощает логи
+# и сравнение со строками из БД.
 
-class UserRole(str, enum.Enum):
+
+class UserRole(enum.StrEnum):
     client = "client"
     master = "master"
     admin = "admin"
 
 
-class AppointmentStatus(str, enum.Enum):
+class AppointmentStatus(enum.StrEnum):
     booked = "booked"
     completed = "completed"
     cancelled = "cancelled"

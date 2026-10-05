@@ -26,12 +26,11 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Numeric,
-    Range,
     Text,
     func,
     text,
 )
-from sqlalchemy.dialects.postgresql import TSTZRANGE, ExcludeConstraint
+from sqlalchemy.dialects.postgresql import TSTZRANGE, ExcludeConstraint, Range
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -77,9 +76,10 @@ class Appointment(Base):
         Index("appointments_service_id_idx", "service_id"),
         Index("appointments_status_idx", "status"),
         Index("appointments_period_gist_idx", "period", postgresql_using="gist"),
-        # Индекс по (master_id, lower(period)) — функциональный, поэтому
-        # создаётся только в миграции: Alembic не умеет сравнивать выражения
-        # и молча пропускает такие индексы при autogenerate.
+        # Главный рабочий индекс: «записи мастера за день» + сортировка
+        # по началу визита. Выражение lower(period) делает индекс
+        # функциональным, поэтому он объявлен через text().
+        Index("appointments_master_start_idx", "master_id", text("lower(period)")),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)

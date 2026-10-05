@@ -12,7 +12,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    # passlib без аннотаций, поэтому .hash() для mypy возвращает Any.
+    return str(pwd_context.hash(password))
 
 
 def verify_password(password: str, password_hash: str) -> bool:

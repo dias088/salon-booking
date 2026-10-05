@@ -11,6 +11,13 @@ from sqlalchemy.orm import DeclarativeBase
 
 # Приближено к тому, как PostgreSQL называет ограничения сам,
 # поэтому схема читается одинаково и из кода, и из \d в psql.
+#
+# ВНИМАНИЕ про "ck": шаблон содержит %(constraint_name)s, а значит соглашение
+# применяется и к ограничениям, у которых имя задано явно — имя подставляется
+# в шаблон, а не используется как есть. Поэтому CheckConstraint надо называть
+# коротко ("period_bounded"), иначе получится appointments_appointments_...
+# Это же правило действует в миграциях: Alembic берёт convention из
+# target_metadata, см. alembic/env.py.
 NAMING_CONVENTION = {
     "ix": "%(table_name)s_%(column_0_N_name)s_idx",
     "uq": "%(table_name)s_%(column_0_N_name)s_key",
