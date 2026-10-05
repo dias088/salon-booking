@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.routes import health
+from app.api.routes import auth, health
 
 api_router = APIRouter(prefix="/api")
 api_router.include_router(health.router)
+api_router.include_router(auth.router)
 
-# Остальные роутеры (auth, services, masters, availability, appointments,
+# Остальные роутеры (services, masters, availability, appointments,
 # admin, master) подключаются на следующих этапах.

@@ -72,6 +72,11 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["E501"]
 
+[tool.ruff.lint.isort]
+# Рядом лежит каталог alembic/, из-за чего ruff принимает пакет alembic
+# за свой. Без этого импорты в тестах разъезжаются при каждом прогоне.
+known-third-party = ["alembic"]
+
 # ---------------------------------------------------------------------------
 # mypy
 # ---------------------------------------------------------------------------
@@ -100,7 +105,9 @@ warn_return_any = false
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "session"
+# Фикстуры живут в том же loop, что и тест: соединения asyncpg нельзя
+# передавать между event loop'ами.
+asyncio_default_fixture_loop_scope = "function"
 addopts = "-q --strict-markers"
 markers = [
     "integration: тесты, которым нужна настоящая PostgreSQL (TEST_DATABASE_URL)",
