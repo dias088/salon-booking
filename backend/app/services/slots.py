@@ -73,7 +73,7 @@ async def load_offers(
     return [Offer(*row) for row in rows]
 
 
-async def _busy_by_master(
+async def busy_by_master(
     session: AsyncSession, master_ids: list[int], window: Interval
 ) -> dict[int, list[Interval]]:
     """Занятое время: активные визиты плюс периоды отсутствия."""
@@ -103,7 +103,7 @@ async def _busy_by_master(
     return busy
 
 
-async def _work_intervals_by_master(
+async def work_intervals_by_master(
     session: AsyncSession, master_ids: list[int], day: date_type
 ) -> dict[int, list[Interval]]:
     """Рабочие интервалы на конкретную дату из недельного графика."""
@@ -128,6 +128,28 @@ async def _work_intervals_by_master(
     return intervals
 
 
+class MasterDayContext(NamedTuple):
+    """Всё, что нужно знать о дне одного мастера, чтобы посчитать слоты."""
+
+    work_intervals: list[Interval]
+    busy: list[Interval]
+
+
+async def master_day_context(
+    session: AsyncSession, master_id: int, day: date_type
+) -> MasterDayContext:
+    """График и занятость одного мастера за день.
+
+    Используется и поиском слотов, и созданием записи: так проверка при
+    бронировании гарантированно совпадает с тем, что показал /availability.
+    """
+    window_start, window_end = day_bounds(day)
+    window = Interval(window_start, window_end)
+    work = await work_intervals_by_master(session, [master_id], day)
+    busy = await busy_by_master(session, [master_id], window)
+    return MasterDayContext(work.get(master_id, []), busy.get(master_id, []))
+
+
 async def day_availability(
     session: AsyncSession,
     *,
@@ -150,8 +172,8 @@ async def day_availability(
 
     window_start, window_end = day_bounds(day)
     window = Interval(window_start, window_end)
-    work_intervals = await _work_intervals_by_master(session, master_ids, day)
-    busy = await _busy_by_master(session, master_ids, window)
+    work_intervals = await work_intervals_by_master(session, master_ids, day)
+    busy = await busy_by_master(session, master_ids, window)
 
     per_master: list[MasterSlots] = []
     by_start: dict[datetime, list[int]] = defaultdict(list)

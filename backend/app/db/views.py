@@ -21,7 +21,19 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import ENUM
 
+from app.db.models.enums import AppointmentStatus
+
 view_metadata = MetaData()
+
+#: Тот же тип, что у колонки appointments.status. Значения нужно перечислить
+#: явно, иначе SQLAlchemy не сможет превратить 'booked' из ответа БД обратно
+#: в member перечисления. create_type=False — тип уже создан миграцией 0001.
+appointment_status_type = ENUM(
+    AppointmentStatus,
+    name="appointment_status",
+    create_type=False,
+    values_callable=lambda enum_cls: [member.value for member in enum_cls],
+)
 
 #: Мастер x услуга с уже посчитанными COALESCE-ценой и длительностью.
 #: Избавляет от повторения «цена мастера либо общая» в каждом запросе.
@@ -50,7 +62,7 @@ appointment_details = Table(
     "v_appointment_details",
     view_metadata,
     Column("id", BigInteger, primary_key=True),
-    Column("status", ENUM(name="appointment_status", create_type=False)),
+    Column("status", appointment_status_type),
     Column("starts_at", DateTime(timezone=True)),
     Column("ends_at", DateTime(timezone=True)),
     Column("duration_min", Integer),
