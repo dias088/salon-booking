@@ -1,0 +1,63 @@
+@import 'tailwindcss';
+
+/*
+  Палитра салона: тёплые нейтральные тона плюс один акцент — глина.
+  Нейтральные намеренно не серые, а с кремовым подтоном: чистый серый
+  рядом с тёплым акцентом выглядит грязным.
+*/
+@theme {
+  --color-sand-50: #fdfaf7;
+  --color-sand-100: #f8f2eb;
+  --color-sand-200: #efe5da;
+  --color-sand-300: #ded0c2;
+  --color-sand-400: #bfab99;
+  --color-sand-500: #9c8675;
+  --color-sand-600: #7a6557;
+  --color-sand-700: #5c4b40;
+  --color-sand-800: #3f332c;
+  --color-sand-900: #2a221d;
+
+  --color-clay-50: #fdf5f1;
+  --color-clay-100: #fae7dd;
+  --color-clay-200: #f3cdba;
+  --color-clay-300: #e8aa8d;
+  --color-clay-400: #da8560;
+  --color-clay-500: #c96a46;
+  --color-clay-600: #b25434;
+  --color-clay-700: #93422b;
+  --color-clay-800: #773829;
+  --color-clay-900: #613026;
+
+  --font-sans:
+    'Inter', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.25rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-sand-50 text-sand-900 antialiased;
+    font-feature-settings: 'tnum' off;
+  }
+
+  /* Видимый фокус обязателен: по визарду записи реально ходят с клавиатуры. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-clay-500;
+  }
+}
+
+@layer components {
+  .skeleton {
+    @apply animate-pulse rounded-lg bg-sand-200;
+  }
+}
+
+/* Табличные цифры в ценах и времени, чтобы колонки не «прыгали». */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
