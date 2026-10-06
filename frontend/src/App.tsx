@@ -11,6 +11,12 @@ import { MasterPage } from '@/pages/MasterPage';
 import { MastersPage } from '@/pages/MastersPage';
 import { MyAppointmentsPage } from '@/pages/MyAppointmentsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { AdminCalendarPage } from '@/pages/admin/AdminCalendarPage';
+import { AdminLayout } from '@/pages/admin/AdminLayout';
+import { AdminMastersPage } from '@/pages/admin/AdminMastersPage';
+import { AdminServicesPage } from '@/pages/admin/AdminServicesPage';
+import { AdminStatsPage } from '@/pages/admin/AdminStatsPage';
+import { MasterSchedulePage } from '@/pages/master/MasterSchedulePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +44,16 @@ export function App() {
                 <Route path="masters/:masterId" element={<MasterPage />} />
                 <Route path="booking" element={<BookingPage />} />
                 <Route path="my" element={<MyAppointmentsPage />} />
+
+                <Route path="admin" element={<AdminLayout />}>
+                  <Route index element={<AdminCalendarPage />} />
+                  <Route path="services" element={<AdminServicesPage />} />
+                  <Route path="masters" element={<AdminMastersPage />} />
+                  <Route path="stats" element={<AdminStatsPage />} />
+                </Route>
+
+                <Route path="master" element={<MasterSchedulePage />} />
+
                 <Route path="*" element={<NotFoundPage />} />
               </Route>
             </Routes>

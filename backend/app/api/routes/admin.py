@@ -94,7 +94,8 @@ async def list_services(
     category_id: int | None = None,
     q: str | None = None,
     page: Annotated[int, Query(ge=1)] = 1,
-    size: Annotated[int, Query(ge=1, le=100)] = 20,
+    # Лимит выше публичного: админке нужен весь справочник одним запросом.
+    size: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> Page[ServiceOut]:
     query = catalog.services_query(category_id=category_id, search=q, only_active=False)
     items, total = await catalog.paginate_services(session, query, page=page, size=size)
@@ -139,7 +140,7 @@ async def list_masters(
     _: AdminOnly,
     session: SessionDep,
     page: Annotated[int, Query(ge=1)] = 1,
-    size: Annotated[int, Query(ge=1, le=100)] = 20,
+    size: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> Page[MasterOut]:
     items, total = await catalog.list_masters(session, only_active=False, page=page, size=size)
     return Page(items=items, total=total, page=page, size=size)
