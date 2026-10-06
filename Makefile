@@ -58,6 +58,9 @@ lint: ## ruff + mypy
 fmt: ## Автоформат и автофиксы backend
 	cd backend && ../$(PY) -m ruff check --fix . && ../$(PY) -m ruff format .
 
+docker-build: ## Собрать образ backend (контекст — корень репозитория)
+	docker build -f backend/Dockerfile -t salon-api:local .
+
 # --- frontend ---------------------------------------------------------------
 
 web-install: ## npm install
