@@ -11,8 +11,8 @@
   * 1 администратор, 4 мастера с разными графиками, 2 клиента
   * 3 категории и 12 услуг
   * один отпуск у мастера-колориста
-  * ~40 визитов за прошлый и текущий месяц + несколько будущих,
-    чтобы страница статистики и «Мои записи» не были пустыми
+  * визиты за полгода назад и на две недели вперёд — чтобы и график
+    выручки, и «Мои записи», и админ-календарь были заполнены
 """
 
 from __future__ import annotations
@@ -50,11 +50,16 @@ ADMIN_PASSWORD = "admin1234"
 CLIENT_PASSWORD = "client1234"
 MASTER_PASSWORD = "master1234"
 
-#: Сколько визитов хотим получить за прошлый и текущий месяц.
-#: 250 на четырёх мастеров — это примерно 35-40% загрузки, как в живом салоне.
-#: При 40 (столько просили изначально) страница статистики показывает 2-4%
-#: и выглядит мёртвой, хотя формально данные есть.
-PAST_APPOINTMENTS_TARGET = 250
+#: Глубина истории. Страница статистики по умолчанию показывает полгода,
+#: и если данных за часть периода нет, загрузка мастеров размазывается:
+#: ёмкость считается за все месяцы, а визиты есть только за часть.
+HISTORY_MONTHS = 6
+
+#: Доля свободных слотов, которые превращаются в визиты. Задаём именно долю,
+#: а не количество: тогда загрузка мастеров остаётся правдоподобной при любой
+#: глубине истории. 0.5 даёт примерно 30-40% — как в живом салоне.
+PAST_FILL_RATIO = 0.5
+
 #: Будущие визиты: чтобы в «Моих записях» было что отменять, а в админ-календаре
 #: на ближайшие дни были блоки, а не пустая сетка.
 FUTURE_APPOINTMENTS_TARGET = 40
@@ -227,9 +232,12 @@ def month_start(day: date) -> date:
     return day.replace(day=1)
 
 
-def previous_month_start(day: date) -> date:
+def history_start(day: date) -> date:
+    """Первое число месяца, с которого начинается демо-история."""
     first = month_start(day)
-    return month_start(first - timedelta(days=1))
+    for _ in range(HISTORY_MONTHS - 1):
+        first = month_start(first - timedelta(days=1))
+    return first
 
 
 def vacation_window(today: date) -> tuple[datetime, datetime]:
@@ -433,7 +441,7 @@ async def create_appointments(
     now: datetime,
 ) -> int:
     today = now.date()
-    past_from = previous_month_start(today)
+    past_from = history_start(today)
     future_to = today + timedelta(days=15)
     vacation = vacation_window(today)
 
@@ -441,7 +449,7 @@ async def create_appointments(
     past = [c for c in candidates if c.ends_at < now]
     future = [c for c in candidates if c.ends_at >= now]
 
-    chosen = RNG.sample(past, min(PAST_APPOINTMENTS_TARGET, len(past)))
+    chosen = RNG.sample(past, round(len(past) * PAST_FILL_RATIO))
     chosen += RNG.sample(future, min(FUTURE_APPOINTMENTS_TARGET, len(future)))
 
     comments = [None, None, None, "Пожалуйста, без фена", "Второй раз у вас", "Опоздаю на 5 минут"]

@@ -12,7 +12,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import Select, func, select
@@ -31,7 +31,7 @@ from app.db.models import Appointment, AppointmentStatus, User, UserRole
 from app.db.views import appointment_details
 from app.schemas.appointment import AppointmentOut, AppointmentScope
 from app.services.availability import Interval, free_slots
-from app.services.slots import load_offers, master_day_context
+from app.services.slots import day_bounds, load_offers, master_day_context
 
 
 class BookingNotAllowedError(UnprocessableError):
@@ -197,6 +197,25 @@ def appointments_query(
             | (appointment_details.c.status != AppointmentStatus.booked)
         )
     return query.order_by(appointment_details.c.starts_at.desc())
+
+
+def limit_to_day(query: Select[Any], day: date) -> Select[Any]:
+    """Сужает выборку до одних суток в часовом поясе салона.
+
+    Границы считаются в местном времени, а не в UTC: «6 октября» для
+    Алматы начинается в 19:00 UTC пятого числа.
+    """
+    return limit_to_range(query, day, day + timedelta(days=1))
+
+
+def limit_to_range(query: Select[Any], day_from: date, day_to: date) -> Select[Any]:
+    """Полуоткрытый диапазон дней [day_from, day_to) в поясе салона."""
+    start, _ = day_bounds(day_from)
+    end, _ = day_bounds(day_to)
+    return query.where(
+        appointment_details.c.starts_at >= start,
+        appointment_details.c.starts_at < end,
+    ).order_by(appointment_details.c.starts_at)
 
 
 async def paginate(

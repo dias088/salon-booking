@@ -41,6 +41,11 @@ class Offer(NamedTuple):
     duration_min: int
 
 
+def today_in_salon() -> date_type:
+    """Сегодня по часовому поясу салона, а не по времени сервера."""
+    return datetime.now(settings.salon_timezone).date()
+
+
 def day_bounds(day: date_type) -> tuple[datetime, datetime]:
     """Границы местных суток салона в виде aware datetime.
 
