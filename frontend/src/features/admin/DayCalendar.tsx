@@ -61,7 +61,7 @@ export function DayCalendar({
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-sand-200 bg-white">
+    <div className="overflow-x-auto surface">
       <div
         className="min-w-[640px]"
         style={{

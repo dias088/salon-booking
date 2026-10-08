@@ -45,7 +45,7 @@ export function AdminServicesPage() {
       {isPending ? (
         <RowsSkeleton rows={5} />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-sand-200 bg-white">
+        <div className="overflow-x-auto surface">
           <table className="w-full min-w-[42rem] text-sm">
             <thead className="border-b border-sand-200 text-left text-sand-500">
               <tr>

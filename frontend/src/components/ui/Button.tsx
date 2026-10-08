@@ -6,17 +6,22 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-clay-600 text-white hover:bg-clay-700 active:bg-clay-800 shadow-sm',
+  // Акцентная тень в тон кнопке, а не чёрная: кнопка «светится» своим цветом.
+  primary: [
+    'bg-clay-600 text-white shadow-accent',
+    'hover:bg-clay-700 hover:-translate-y-px hover:shadow-lift',
+    'active:translate-y-0 active:bg-clay-800 active:shadow-card',
+  ].join(' '),
   secondary:
-    'bg-white text-sand-800 border border-sand-300 hover:bg-sand-100 active:bg-sand-200',
+    'bg-white text-sand-800 border border-sand-200 shadow-card hover:border-sand-300 hover:bg-sand-50 active:bg-sand-100',
   ghost: 'text-sand-700 hover:bg-sand-100 active:bg-sand-200',
   danger: 'bg-white text-red-700 border border-red-200 hover:bg-red-50 active:bg-red-100',
 };
 
 const SIZES: Record<Size, string> = {
-  sm: 'h-9 px-3 text-sm rounded-lg',
-  md: 'h-11 px-4 text-sm rounded-xl',
-  lg: 'h-13 px-6 text-base rounded-xl',
+  sm: 'h-9 px-3.5 text-sm rounded-lg',
+  md: 'h-11 px-5 text-sm rounded-xl',
+  lg: 'h-13 px-7 text-base rounded-xl',
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -36,8 +41,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       // disabled при loading, иначе двойной клик отправит две записи.
       disabled={props.disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 font-medium transition-colors',
-        'disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-flex items-center justify-center gap-2 font-medium',
+        'transition-all duration-150 ease-out',
+        // Отключённая кнопка не должна подпрыгивать под курсором.
+        'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+        'disabled:translate-y-0 disabled:shadow-none',
         VARIANTS[variant],
         SIZES[size],
         fullWidth && 'w-full',

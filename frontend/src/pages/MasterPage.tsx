@@ -61,7 +61,7 @@ export function MasterPage() {
             data.services.map((offer) => (
               <article
                 key={offer.service_id}
-                className="flex items-center justify-between gap-4 rounded-2xl border border-sand-200 bg-white p-4"
+                className="flex items-center justify-between gap-4 surface p-4"
               >
                 <div className="min-w-0">
                   <h3 className="font-medium text-sand-900">{offer.service_name}</h3>

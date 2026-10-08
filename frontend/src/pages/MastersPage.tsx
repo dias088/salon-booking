@@ -27,7 +27,7 @@ export function MastersPage() {
             <Link
               key={master.id}
               to={`/masters/${master.id}`}
-              className="flex items-start gap-4 rounded-2xl border border-sand-200 bg-white p-5 transition-colors hover:border-clay-300 hover:bg-clay-50/40"
+              className="flex items-start gap-4 surface p-5 transition-colors hover:border-clay-300 hover:bg-clay-50/40"
             >
               <Avatar name={master.full_name} photoUrl={master.photo_url} />
               <div className="min-w-0">

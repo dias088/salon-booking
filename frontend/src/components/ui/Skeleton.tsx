@@ -7,7 +7,7 @@ export function Skeleton({ className }: { className?: string }) {
 /** Скелет карточки услуги — повторяет её реальные пропорции. */
 export function ServiceCardSkeleton() {
   return (
-    <div className="rounded-2xl border border-sand-200 bg-white p-5">
+    <div className="surface p-5">
       <Skeleton className="h-5 w-2/3" />
       <Skeleton className="mt-3 h-4 w-full" />
       <Skeleton className="mt-2 h-4 w-4/5" />

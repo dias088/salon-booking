@@ -124,7 +124,7 @@ function ScheduleRow({ appointment }: { appointment: Appointment }) {
   };
 
   return (
-    <li className="flex flex-wrap items-center gap-4 rounded-2xl border border-sand-200 bg-white p-4">
+    <li className="flex flex-wrap items-center gap-4 surface p-4">
       <span className="tabular w-20 shrink-0 font-semibold text-sand-900">
         {formatTime(appointment.starts_at)}
       </span>

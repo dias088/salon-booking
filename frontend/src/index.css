@@ -33,6 +33,17 @@
 
   --radius-xl: 0.875rem;
   --radius-2xl: 1.25rem;
+
+  /*
+    Тени тонированы в тёплый коричневый, а не в чёрный. Чистый чёрный на
+    кремовом фоне даёт серый ореол и выглядит грязно — тень должна быть
+    из той же температуры, что и поверхность под ней.
+  */
+  --shadow-card: 0 1px 2px rgb(63 51 44 / 0.04), 0 1px 3px rgb(63 51 44 / 0.05);
+  --shadow-lift: 0 2px 4px rgb(63 51 44 / 0.04), 0 8px 16px rgb(63 51 44 / 0.08);
+  --shadow-pop: 0 4px 6px rgb(63 51 44 / 0.05), 0 16px 32px rgb(63 51 44 / 0.12);
+  /* Акцентная тень для главной кнопки — приподнимает её над плоскостью. */
+  --shadow-accent: 0 1px 2px rgb(146 66 43 / 0.2), 0 4px 12px rgb(201 106 70 / 0.25);
 }
 
 @layer base {
@@ -54,6 +65,30 @@
 @layer components {
   .skeleton {
     @apply animate-pulse rounded-lg bg-sand-200;
+  }
+
+  /*
+    Единая поверхность карточки. Раньше border + bg-white повторялись
+    в двух десятках мест и успели разойтись; теперь одно определение.
+  */
+  .surface {
+    @apply rounded-2xl border border-sand-200/80 bg-white shadow-card;
+  }
+
+  /*
+    Кликабельная карточка: приподнимается под курсором, а не меняет цвет.
+    Утилиты повторены намеренно — @apply в Tailwind v4 принимает только
+    утилиты, собственный класс .surface через него не подставить.
+  */
+  .surface-link {
+    @apply rounded-2xl border border-sand-200/80 bg-white shadow-card;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:-translate-y-0.5 hover:border-clay-200 hover:shadow-lift;
+  }
+
+  /* Заголовок страницы. tracking сжат — на крупном кегле иначе рыхло. */
+  .display {
+    @apply font-semibold tracking-[-0.025em] text-sand-900;
   }
 }
 

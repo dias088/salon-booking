@@ -30,10 +30,7 @@ export function CatalogPage() {
             <h2 className="text-lg font-semibold text-sand-900">{category.name}</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {category.services.map((service) => (
-                <article
-                  key={service.id}
-                  className="flex flex-col rounded-2xl border border-sand-200 bg-white p-5"
-                >
+                <article key={service.id} className="flex flex-col surface p-5">
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="font-medium text-sand-900">{service.name}</h3>
                     <span className="tabular shrink-0 font-semibold text-clay-700">
