@@ -9,7 +9,7 @@ from __future__ import annotations
 import functools
 from pathlib import Path
 from typing import Literal
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, available_timezones
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -53,6 +53,28 @@ class Settings(BaseSettings):
     cookie_samesite: Literal["lax", "none", "strict"] = "lax"
     cookie_domain: str | None = None
     refresh_cookie_name: str = "salon_refresh"
+
+    @field_validator("salon_tz")
+    @classmethod
+    def _require_known_timezone(cls, value: str) -> str:
+        """Проверяем пояс на старте, а не на первом запросе.
+
+        Опечатка вроде Asia/Astana (такой зоны в tzdata нет, Астана живёт
+        в Asia/Almaty) раньше проходила молча: приложение поднималось,
+        health отвечал «ok», а 500 прилетал на первом же запросе слотов.
+        """
+        try:
+            ZoneInfo(value)
+        except Exception as exc:
+            kazakh = sorted(
+                zone
+                for zone in available_timezones()
+                if zone.startswith(("Asia/Al", "Asia/Aq", "Asia/At", "Asia/Or", "Asia/Q"))
+            )
+            raise ValueError(
+                f"Неизвестный часовой пояс SALON_TZ={value!r}. Зоны Казахстана: {', '.join(kazakh)}"
+            ) from exc
+        return value
 
     @field_validator("database_url", "test_database_url")
     @classmethod
