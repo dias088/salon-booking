@@ -112,11 +112,17 @@ function MasterPanel({ masterId }: { masterId: number }) {
     <div className="space-y-5">
       <Card>
         <CardTitle>График работы</CardTitle>
-        <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+        {/*
+          Одна колонка, а не две. При двух часы левого дня упирались
+          в название правого, и строка читалась как один день:
+          «пятница 10:00–14:00, 15:00–19:00 суббота выходной».
+          Разделители дают глазу якорь на списке из семи строк.
+        */}
+        <dl className="mt-3 divide-y divide-sand-100 text-sm">
           {Array.from({ length: 7 }, (_, weekday) => {
             const intervals = byWeekday.get(weekday);
             return (
-              <div key={weekday} className="flex justify-between gap-4">
+              <div key={weekday} className="flex items-baseline justify-between gap-4 py-2">
                 <dt className="text-sand-600">{weekdayName(weekday, true)}</dt>
                 <dd className={intervals ? 'tabular text-sand-900' : 'text-sand-400'}>
                   {intervals ? intervals.join(', ') : 'выходной'}
