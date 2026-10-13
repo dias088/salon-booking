@@ -32,23 +32,20 @@ Fullstack-приложение для записи клиентов к маст�
 | **Статистика** `/admin/stats` | выручка по месяцам с накопительным итогом, топ услуг с рангом внутри категории, загрузка мастеров в процентах |
 | **Расписание мастера** `/master` | свой день и неделя, отметки «состоялась» и «не пришёл» |
 
-<!--
-Скриншоты: снять на демо-данных после `make seed`, положить в docs/screenshots/
-с именами home.png, booking-wizard.png, my-appointments.png, admin-calendar.png,
-admin-stats.png, master-schedule.png — и раскомментировать блок ниже.
-
-| Главная и каталог | Визард записи |
+| Главная | Выбор времени |
 |---|---|
-| ![Главная](docs/screenshots/home.png) | ![Визард](docs/screenshots/booking-wizard.png) |
+| ![Главная](docs/screenshots/home.png) | ![Визард записи](docs/screenshots/booking-wizard.png) |
 
-| Админ-календарь дня | Статистика |
+Слоты сгруппированы по времени суток. Пропуски в сетке — занятые окна:
+они не показаны серыми, их просто нет.
+
+| Календарь дня | Статистика |
 |---|---|
-| ![Календарь](docs/screenshots/admin-calendar.png) | ![Статистика](docs/screenshots/admin-stats.png) |
+| ![Админ-календарь](docs/screenshots/admin-calendar.png) | ![Статистика](docs/screenshots/admin-stats.png) |
 
 | Мои записи | Расписание мастера |
 |---|---|
-| ![Мои записи](docs/screenshots/my-appointments.png) | ![Расписание](docs/screenshots/master-schedule.png) |
--->
+| ![Мои записи](docs/screenshots/my-appointments.png) | ![Расписание мастера](docs/screenshots/master-schedule.png) |
 
 ---
 
