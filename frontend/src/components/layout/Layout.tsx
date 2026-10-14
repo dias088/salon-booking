@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 
 import { Button } from '@/components/ui/Button';
+import { brand, brandFooterLine } from '@/config/brand';
 import { AuthDialog } from '@/features/auth/AuthDialog';
 import { useAuth } from '@/lib/auth';
 import { cn } from '@/lib/cn';
@@ -21,6 +22,12 @@ export function Layout() {
   const isWorkspace = pathname.startsWith('/admin') || pathname.startsWith('/master');
   const container = isWorkspace ? 'max-w-7xl' : 'max-w-5xl';
 
+  // Заголовок вкладки ставим из кода, а не из index.html: там подстановка
+  // переменных сборки оставила бы literal %VITE_BRAND_NAME%, если её забыли задать.
+  useEffect(() => {
+    document.title = `${brand.name} — онлайн-запись`;
+  }, []);
+
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-30 border-b border-sand-200/70 bg-sand-50/80 backdrop-blur-md">
@@ -28,10 +35,11 @@ export function Layout() {
           <Link to="/" className="group flex items-center gap-2.5">
             {/* Монограмма вместо голого текста: даёт бренду точку опоры. */}
             <span className="grid size-8 place-items-center rounded-lg bg-clay-600 text-sm font-semibold text-white shadow-accent transition-transform group-hover:scale-105">
-              С
+              {brand.monogram}
             </span>
             <span className="font-semibold tracking-tight text-sand-900">
-              Салон <span className="text-clay-600">красоты</span>
+              {brand.head && `${brand.head} `}
+              <span className="text-clay-600">{brand.accent}</span>
             </span>
           </Link>
 
@@ -96,9 +104,19 @@ export function Layout() {
 
       <footer className="border-t border-sand-200 bg-white">
         <div className={cn('mx-auto px-4 py-8 text-sm text-sand-500', container)}>
-          <p>Салон красоты · Алматы · ежедневно с 9:00 до 21:00</p>
+          <p>{brandFooterLine}</p>
+          {brand.phone && (
+            <p className="mt-1">
+              <a
+                href={`tel:${brand.phone.replace(/[^+\d]/g, '')}`}
+                className="hover:text-sand-700"
+              >
+                {brand.phone}
+              </a>
+            </p>
+          )}
           <p className="mt-1">
-            Учебный проект.{' '}
+            {brand.footerNote && `${brand.footerNote} `}
             <a href="/docs" className="underline underline-offset-2 hover:text-sand-700">
               Документация API
             </a>

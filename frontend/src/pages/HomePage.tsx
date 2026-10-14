@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCatalog } from '@/api/queries';
 import { Button } from '@/components/ui/Button';
 import { ServiceCardSkeleton } from '@/components/ui/Skeleton';
+import { brandTagline } from '@/config/brand';
 import { formatDuration, formatMoney } from '@/lib/format';
 
 /** Короткие обещания под кнопками. Раньше это были три пустоватые карточки. */
@@ -35,7 +36,7 @@ export function HomePage() {
         />
 
         <p className="text-sm font-medium tracking-wide text-clay-700 uppercase">
-          Алматы · ежедневно 9:00–21:00
+          {brandTagline}
         </p>
 
         <h1 className="display mt-4 max-w-2xl text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
